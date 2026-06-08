@@ -1149,6 +1149,28 @@ public class StringSubstitutor {
     }
 
     /**
+     * Resolves a variable, returning a default value if the variable cannot be resolved.
+     * <p>
+     * Writers of subclasses can override this method if they need to alter how each substitution occurs. The method is
+     * passed the variable's name and a default value, and must return the corresponding value or the default value if
+     * the variable is unknown.
+     * </p>
+     *
+     * @param variableName the name of the variable, not null.
+     * @param buf the buffer where the substitution is occurring, not null.
+     * @param startPos the start position of the variable including the prefix, valid.
+     * @param endPos the end position of the variable including the suffix, valid.
+     * @param defaultValue the default value to return if the variable cannot be resolved.
+     * @return The variable's value or the default value if the variable is unknown.
+     * @since 1.16.0
+     */
+    protected String resolveVariableOrDefault(final String variableName, final TextStringBuilder buf, final int startPos,
+        final int endPos, final String defaultValue) {
+        final String value = resolveVariable(variableName, buf, startPos, endPos);
+        return value != null ? value : defaultValue;
+    }
+
+    /**
      * Sets a flag whether substitution is done in variable values (recursive).
      *
      * @param disableSubstitutionInValues true if substitution in variable value are disabled.
