@@ -1,0 +1,30 @@
+diff --git a/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java b/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+index 26077d9..23bc109 100644
+--- a/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
++++ b/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+@@ -605,4 +605,21 @@ class StringEscapeUtilsTest {
+         assertEquals("\\", unescapeXSI("\\\\"));
+         assertEquals("", unescapeXSI("\\"));
+     }
++
++    @Test
++    void testEscapeHtml4Scenarios() {
++        // 1. null 输入返回 null
++        assertNull(StringEscapeUtils.escapeHtml4(null));
++
++        // 2. 空字符串返回空
++        assertEquals("", StringEscapeUtils.escapeHtml4(""));
++
++        // 3. 包含 < > & " ' 的转义验证
++        final String specialChars = "<>&\"'";
++        assertEquals("&lt;&gt;&amp;&quot;&apos;", StringEscapeUtils.escapeHtml4(specialChars));
++
++        // 4. 包含中文字符“测试”及 emoji“😀”的 Unicode 处理
++        final String unicodeChars = "测试😀";
++        assertEquals("测试😀", StringEscapeUtils.escapeHtml4(unicodeChars));
++
++        // 5. 混合 HTML 标签与特殊符号
++        final String mixedHtml = "<div class=\"test\">Test &amp; 测试😀</div>";
++        assertEquals("&lt;div class=&quot;test&quot;&gt;Test &amp;amp; 测试😀&lt;/div&gt;", StringEscapeUtils.escapeHtml4(mixedHtml));
++    }
+ }

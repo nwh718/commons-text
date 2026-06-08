@@ -1,0 +1,132 @@
+diff --git a/pom.xml b/pom.xml
+index 6100599c..855f91e2 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -143,29 +143,6 @@
+       <scope>test</scope>
+     </dependency>
+   </dependencies>
+-  <dependencyManagement>
+-    <dependencies>
+-      <dependency>
+-        <groupId>org.mockito</groupId>
+-        <!--  Use mockito-inline instead of mockito-core to mock and spy on final classes. -->
+-        <artifactId>mockito-inline</artifactId>
+-        <version>${commons.mockito.version}</version>
+-        <scope>test</scope>
+-      </dependency>
+-      <dependency>
+-        <groupId>org.graalvm.js</groupId>
+-        <artifactId>js</artifactId>
+-        <version>${graalvm.version}</version>
+-        <scope>test</scope>
+-      </dependency>
+-      <dependency>
+-        <groupId>org.graalvm.js</groupId>
+-        <artifactId>js-scriptengine</artifactId>
+-        <version>${graalvm.version}</version>
+-        <scope>test</scope>
+-      </dependency>
+-    </dependencies>
+-  </dependencyManagement>
+   <build>
+     <defaultGoal>clean verify apache-rat:check japicmp:cmp checkstyle:check pmd:check spotbugs:check javadoc:javadoc</defaultGoal>
+     <pluginManagement>
+@@ -466,23 +443,65 @@
+ 	    <!-- Java 8-10 -->
+       <id>java-8-10</id>
+       <activation>
+-		<jdk>[1.8,10]</jdk>
++		<jdk>[1.8,10)</jdk>
+ 	  </activation>
+       <properties>
+         <commons.mockito.version>4.11.0</commons.mockito.version>
+         <graalvm.version>22.0.0.2</graalvm.version>
+       </properties>
++	  <dependencies>
++        <dependency>
++          <groupId>org.mockito</groupId>
++          <!--  Use mockito-inline instead of mockito-core to mock and spy on final classes. -->
++          <artifactId>mockito-inline</artifactId>
++          <version>${commons.mockito.version}</version>
++          <scope>test</scope>
++        </dependency>
++        <dependency>
++          <groupId>org.graalvm.js</groupId>
++          <artifactId>js</artifactId>
++          <version>${graalvm.version}</version>
++          <scope>test</scope>
++        </dependency>
++        <dependency>
++          <groupId>org.graalvm.js</groupId>
++          <artifactId>js-scriptengine</artifactId>
++          <version>${graalvm.version}</version>
++          <scope>test</scope>
++        </dependency>
++	  </dependencies>
+     </profile>
+     <profile>
+ 	    <!-- Java 11-21 -->
+       <id>java-11-21</id>
+       <activation>
+-		<jdk>[11,21]</jdk>
++		<jdk>[11,22)</jdk>
+ 	  </activation>
+       <properties>
+         <commons.mockito.version>5.2.0</commons.mockito.version>
+         <graalvm.version>22.3.5</graalvm.version>
+       </properties>
++	    <dependencies>
++        <dependency>
++          <groupId>org.mockito</groupId>
++          <!--  Use mockito-inline instead of mockito-core to mock and spy on final classes. -->
++          <artifactId>mockito-inline</artifactId>
++          <version>${commons.mockito.version}</version>
++          <scope>test</scope>
++        </dependency>
++        <dependency>
++          <groupId>org.graalvm.js</groupId>
++          <artifactId>js</artifactId>
++          <version>${graalvm.version}</version>
++          <scope>test</scope>
++        </dependency>
++        <dependency>
++          <groupId>org.graalvm.js</groupId>
++          <artifactId>js-scriptengine</artifactId>
++          <version>${graalvm.version}</version>
++          <scope>test</scope>
++        </dependency>
++	  </dependencies>
+     </profile>
+     <profile>
+ 	    <!-- Java 22 and up -->
+diff --git a/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java b/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+index aa3b27ea..85aba9f6 100644
+--- a/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
++++ b/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+@@ -606,4 +606,25 @@ class StringEscapeUtilsTest {
+         assertEquals("\\", unescapeXSI("\\\\"));
+         assertEquals("", unescapeXSI("\\"));
+     }
++
++    @Test
++    void testEscapeHtml4Scenarios() {
++        // 1. null 输入返回 null
++        assertNull(StringEscapeUtils.escapeHtml4(null));
++
++        // 2. 空字符串返回空
++        assertEquals("", StringEscapeUtils.escapeHtml4(""));
++
++        // 3. 包含 < > & " ' 的转义验证
++        final String specialChars = "<>&\"'";
++        assertEquals("&lt;&gt;&amp;&quot;&apos;", StringEscapeUtils.escapeHtml4(specialChars));
++
++        // 4. 包含中文字符“测试”及 emoji“😀”的 Unicode 处理
++        final String unicodeChars = "测试😀";
++        assertEquals("测试😀", StringEscapeUtils.escapeHtml4(unicodeChars));
++
++        // 5. 混合 HTML 标签与特殊符号
++        final String mixedHtml = "<div class=\"test\">Test &amp; 测试😀</div>";
++        assertEquals("&lt;div class=&quot;test&quot;&gt;Test &amp;amp; 测试😀&lt;/div&gt;", StringEscapeUtils.escapeHtml4(mixedHtml));
++    }
+ }
