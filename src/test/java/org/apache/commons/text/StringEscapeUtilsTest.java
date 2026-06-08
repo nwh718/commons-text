@@ -228,29 +228,12 @@ class StringEscapeUtilsTest {
     }
 
     @Test
-    void testEscapeHtml4EmptyString() {
-        assertEquals("", StringEscapeUtils.escapeHtml4(""));
-    }
-
-    @Test
-    void testEscapeHtml4MixedHtmlAndSpecialCharacters() {
-        final String input = "<span title=\"测试\">Tom & Jerry's 😀</span>";
-        assertEquals("&lt;span title=&quot;测试&quot;&gt;Tom &amp; Jerry's 😀&lt;/span&gt;", StringEscapeUtils.escapeHtml4(input));
-    }
-
-    @Test
-    void testEscapeHtml4NullInput() {
-        assertNull(StringEscapeUtils.escapeHtml4(null));
-    }
-
-    @Test
-    void testEscapeHtml4SpecialCharacters() {
-        assertEquals("&lt;&gt;&amp;&quot;'", StringEscapeUtils.escapeHtml4("<>&\"'"));
-    }
-
-    @Test
-    void testEscapeHtml4UnicodeCharacters() {
-        assertEquals("测试😀", StringEscapeUtils.escapeHtml4("测试😀"));
+    void testEscapeHtml4Scenarios() {
+        assertNull(StringEscapeUtils.escapeHtml4(null), "null 输入返回 null");
+        assertEquals("", StringEscapeUtils.escapeHtml4(""), "空字符串返回空");
+        assertEquals("&lt;&gt;&amp;&quot;'", StringEscapeUtils.escapeHtml4("<>&\"'"), "包含 < > & \" ' 的转义验证");
+        assertEquals("测试😀", StringEscapeUtils.escapeHtml4("测试😀"), "包含中文字符和 emoji 的 Unicode 处理");
+        assertEquals("&lt;b&gt;测试&lt;/b&gt; &amp; 😀", StringEscapeUtils.escapeHtml4("<b>测试</b> & 😀"), "混合 HTML 标签与特殊符号");
     }
 
     /**

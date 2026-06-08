@@ -1,0 +1,83 @@
+diff --git a/escape-html4-tests.patch b/escape-html4-tests.patch
+deleted file mode 100644
+index 880234fb..00000000
+--- a/escape-html4-tests.patch
++++ /dev/null
+@@ -1,37 +0,0 @@
+---- a/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+-+++ b/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+-@@ -226,6 +226,32 @@
+-             final String actual = original == null ? null : sw.toString();
+-             assertEquals(expected, actual, message);
+-         }
+-     }
+- 
+-+    @Test
+-+    void testEscapeHtml4EmptyString() {
+-+        assertEquals("", StringEscapeUtils.escapeHtml4(""));
+-+    }
+-+
+-+    @Test
+-+    void testEscapeHtml4MixedHtmlAndSpecialCharacters() {
+-+        final String input = "<span title=\"测试\">Tom & Jerry's 😀</span>";
+-+        assertEquals("&lt;span title=&quot;测试&quot;&gt;Tom &amp; Jerry's 😀&lt;/span&gt;", StringEscapeUtils.escapeHtml4(input));
+-+    }
+-+
+-+    @Test
+-+    void testEscapeHtml4NullInput() {
+-+        assertNull(StringEscapeUtils.escapeHtml4(null));
+-+    }
+-+
+-+    @Test
+-+    void testEscapeHtml4SpecialCharacters() {
+-+        assertEquals("&lt;&gt;&amp;&quot;'", StringEscapeUtils.escapeHtml4("<>&\"'"));
+-+    }
+-+
+-+    @Test
+-+    void testEscapeHtml4UnicodeCharacters() {
+-+        assertEquals("测试😀", StringEscapeUtils.escapeHtml4("测试😀"));
+-+    }
+-+
+-     /**
+-      * Tests // https://issues.apache.org/jira/browse/LANG-480
+-      */
+diff --git a/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java b/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+index 00a0c6e7..6255cc51 100644
+--- a/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
++++ b/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+@@ -228,29 +228,12 @@ class StringEscapeUtilsTest {
+     }
+ 
+     @Test
+-    void testEscapeHtml4EmptyString() {
+-        assertEquals("", StringEscapeUtils.escapeHtml4(""));
+-    }
+-
+-    @Test
+-    void testEscapeHtml4MixedHtmlAndSpecialCharacters() {
+-        final String input = "<span title=\"测试\">Tom & Jerry's 😀</span>";
+-        assertEquals("&lt;span title=&quot;测试&quot;&gt;Tom &amp; Jerry's 😀&lt;/span&gt;", StringEscapeUtils.escapeHtml4(input));
+-    }
+-
+-    @Test
+-    void testEscapeHtml4NullInput() {
+-        assertNull(StringEscapeUtils.escapeHtml4(null));
+-    }
+-
+-    @Test
+-    void testEscapeHtml4SpecialCharacters() {
+-        assertEquals("&lt;&gt;&amp;&quot;'", StringEscapeUtils.escapeHtml4("<>&\"'"));
+-    }
+-
+-    @Test
+-    void testEscapeHtml4UnicodeCharacters() {
+-        assertEquals("测试😀", StringEscapeUtils.escapeHtml4("测试😀"));
++    void testEscapeHtml4Scenarios() {
++        assertNull(StringEscapeUtils.escapeHtml4(null), "null 输入返回 null");
++        assertEquals("", StringEscapeUtils.escapeHtml4(""), "空字符串返回空");
++        assertEquals("&lt;&gt;&amp;&quot;'", StringEscapeUtils.escapeHtml4("<>&\"'"), "包含 < > & \" ' 的转义验证");
++        assertEquals("测试😀", StringEscapeUtils.escapeHtml4("测试😀"), "包含中文字符和 emoji 的 Unicode 处理");
++        assertEquals("&lt;b&gt;测试&lt;/b&gt; &amp; 😀", StringEscapeUtils.escapeHtml4("<b>测试</b> & 😀"), "混合 HTML 标签与特殊符号");
+     }
+ 
+     /**
