@@ -143,52 +143,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-inline</artifactId>
-        <version>${commons.mockito.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.graalvm.js</groupId>
-        <artifactId>js</artifactId>
-        <version>${graalvm.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.graalvm.js</groupId>
-        <artifactId>js-scriptengine</artifactId>
-        <version>${graalvm.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.graalvm.js</groupId>
-        <artifactId>js-language</artifactId>
-        <version>${graalvm.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.graalvm.truffle</groupId>
-        <artifactId>truffle-runtime</artifactId>
-        <version>${graalvm.version}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.graalvm.js</groupId>
-      <artifactId>js-scriptengine</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
   <build>
     <defaultGoal>clean verify apache-rat:check japicmp:cmp checkstyle:check pmd:check spotbugs:check javadoc:javadoc</defaultGoal>
     <pluginManagement>
@@ -489,7 +443,7 @@
 	    <!-- Java 8-10 -->
       <id>java-8-10</id>
       <activation>
-		<jdk>[1.8,10]</jdk>
+		<jdk>[1.8,10)</jdk>
 	  </activation>
       <properties>
         <commons.mockito.version>4.11.0</commons.mockito.version>
@@ -497,8 +451,22 @@
       </properties>
 	  <dependencies>
         <dependency>
+          <groupId>org.mockito</groupId>
+          <!--  Use mockito-inline instead of mockito-core to mock and spy on final classes. -->
+          <artifactId>mockito-inline</artifactId>
+          <version>${commons.mockito.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
           <groupId>org.graalvm.js</groupId>
           <artifactId>js</artifactId>
+          <version>${graalvm.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js-scriptengine</artifactId>
+          <version>${graalvm.version}</version>
           <scope>test</scope>
         </dependency>
 	  </dependencies>
@@ -507,16 +475,30 @@
 	    <!-- Java 11-21 -->
       <id>java-11-21</id>
       <activation>
-		<jdk>[11,21]</jdk>
+		<jdk>[11,22)</jdk>
 	  </activation>
       <properties>
         <commons.mockito.version>5.2.0</commons.mockito.version>
         <graalvm.version>22.3.5</graalvm.version>
       </properties>
-	  <dependencies>
+	    <dependencies>
+        <dependency>
+          <groupId>org.mockito</groupId>
+          <!--  Use mockito-inline instead of mockito-core to mock and spy on final classes. -->
+          <artifactId>mockito-inline</artifactId>
+          <version>${commons.mockito.version}</version>
+          <scope>test</scope>
+        </dependency>
         <dependency>
           <groupId>org.graalvm.js</groupId>
           <artifactId>js</artifactId>
+          <version>${graalvm.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js-scriptengine</artifactId>
+          <version>${graalvm.version}</version>
           <scope>test</scope>
         </dependency>
 	  </dependencies>
@@ -546,17 +528,38 @@
 		</plugins>
 	  </build>
 	  <dependencies>
+        <dependency>
+          <groupId>org.mockito</groupId>
+          <!--  Use mockito-inline instead of mockito-core to mock and spy on final classes. -->
+          <artifactId>mockito-inline</artifactId>
+          <version>${commons.mockito.version}</version>
+          <scope>test</scope>
+        </dependency>
+<!--        <dependency>-->
+<!--          <groupId>org.graalvm.polyglot</groupId>-->
+<!--          <artifactId>js</artifactId>-->
+<!--          <version>${graalvm.version}</version>-->
+<!--          <scope>test</scope>-->
+<!--        </dependency>-->
         <!-- Workaround for issue https://github.com/oracle/graaljs/issues/813 -->
         <dependency>
           <groupId>org.graalvm.js</groupId>
           <artifactId>js-language</artifactId>
+          <version>${graalvm.version}</version>
           <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.graalvm.truffle</groupId>
           <artifactId>truffle-runtime</artifactId>
+          <version>${graalvm.version}</version>
           <scope>test</scope>
         </dependency>        
+        <dependency>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js-scriptengine</artifactId>
+          <version>${graalvm.version}</version>
+          <scope>test</scope>
+        </dependency>
 	  </dependencies>
     </profile>
     <profile>
