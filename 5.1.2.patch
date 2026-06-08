@@ -1,0 +1,36 @@
+diff --git a/src/main/java/org/apache/commons/text/StringSubstitutor.java b/src/main/java/org/apache/commons/text/StringSubstitutor.java
+index 88cd288c..c43374e7 100644
+--- a/src/main/java/org/apache/commons/text/StringSubstitutor.java
++++ b/src/main/java/org/apache/commons/text/StringSubstitutor.java
+@@ -1149,25 +1149,16 @@ public class StringSubstitutor {
+     }
+ 
+     /**
+-     * Resolves a variable, returning a default value if the variable cannot be resolved.
+-     * <p>
+-     * Writers of subclasses can override this method if they need to alter how each substitution occurs. The method is
+-     * passed the variable's name and a default value, and must return the corresponding value or the default value if
+-     * the variable is unknown.
+-     * </p>
++     * Resolves the specified variable, returning the default value if the variable is unknown.
+      *
+      * @param variableName the name of the variable, not null.
+-     * @param buf the buffer where the substitution is occurring, not null.
+-     * @param startPos the start position of the variable including the prefix, valid.
+-     * @param endPos the end position of the variable including the suffix, valid.
+-     * @param defaultValue the default value to return if the variable cannot be resolved.
+-     * @return The variable's value or the default value if the variable is unknown.
++     * @param defaultValue the default value to return if the variable is unknown.
++     * @return the variable's value if known, otherwise {@code defaultValue}.
+      * @since 1.16.0
+      */
+-    protected String resolveVariableOrDefault(final String variableName, final TextStringBuilder buf, final int startPos,
+-        final int endPos, final String defaultValue) {
+-        final String value = resolveVariable(variableName, buf, startPos, endPos);
+-        return value != null ? value : defaultValue;
++    protected String resolveVariableOrDefault(final String variableName, final String defaultValue) {
++        final String resolvedValue = resolveVariable(variableName, null, 0, 0);
++        return resolvedValue != null ? resolvedValue : defaultValue;
+     }
+ 
+     /**
