@@ -1,6 +1,7 @@
---- src/main/java/org/apache/commons/text/WordUtils.java
-+++ src/main/java/org/apache/commons/text/WordUtils.java
-@@ -812,19 +812,17 @@
+diff --git a/src/main/java/org/apache/commons/text/WordUtils.java b/src/main/java/org/apache/commons/text/WordUtils.java
+--- a/src/main/java/org/apache/commons/text/WordUtils.java
++++ b/src/main/java/org/apache/commons/text/WordUtils.java
+@@ -812,26 +812,20 @@
  
          while (offset < inputLineLength) {
 -            int spaceToWrapAt = -1;
@@ -29,16 +30,13 @@
 +
              // only last line without leading spaces is left
              if (inputLineLength - offset <= wrapLength) {
-@@ -832,8 +830,4 @@
-             }
- 
--            while (matcher.find()) {
--                spaceToWrapAt = matcher.start() + offset;
+                 break;
 -            }
 -
-             if (spaceToWrapAt >= offset) {
-                 // normal case
-@@ -854,8 +848,10 @@
+-            while (matcher.find()) {
+-                spaceToWrapAt = matcher.start() + offset;
+             }
+@@ -848,8 +842,10 @@
              } else {
                  // do not wrap really long word, just extend beyond limit
 -                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));
@@ -52,8 +50,7 @@
 +                        matcherSize = m.end();
 +                    }
                  }
- 
-@@ -884,4 +884,24 @@
+@@ -884,4 +880,24 @@
      }
  
 +    private static int findNextWrapPosition(final String str, final int offset, final int wrapLength, final Pattern pattern, final boolean wrapLongWords) {
