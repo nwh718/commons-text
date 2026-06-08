@@ -504,18 +504,51 @@
 	  </dependencies>
     </profile>
     <profile>
-      <!-- Java 21 build -->
+      <!-- Java 21 build profile -->
       <id>java-21-build</id>
       <activation>
-        <jdk>[21,22)</jdk>
+        <jdk>21</jdk>
       </activation>
       <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <commons.mockito.version>5.2.0</commons.mockito.version>
         <graalvm.version>22.3.5</graalvm.version>
-        <benchmark>org.apache.commons.text.jmh.StringProcessorBenchmark</benchmark>
+        <skipTests>true</skipTests>
+        <benchmark>org.apache.commons.text.StringProcessorBenchmark</benchmark>
       </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-inline</artifactId>
+          <version>${commons.mockito.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js</artifactId>
+          <version>${graalvm.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js-scriptengine</artifactId>
+          <version>${graalvm.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjdk.jmh</groupId>
+          <artifactId>jmh-core</artifactId>
+          <version>${jmh.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjdk.jmh</groupId>
+          <artifactId>jmh-generator-annprocess</artifactId>
+          <version>${jmh.version}</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
       <build>
         <plugins>
           <plugin>
@@ -523,7 +556,7 @@
             <version>${commons.compiler.version}</version>
             <configuration combine.self="override">
               <testIncludes>
-                <testInclude>**/StringProcessorBenchmark.java</testInclude>
+                <testInclude>**/*</testInclude>
               </testIncludes>
             </configuration>
           </plugin>
@@ -532,7 +565,7 @@
             <artifactId>exec-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>string-processor-benchmark</id>
+                <id>benchmark</id>
                 <phase>test</phase>
                 <goals>
                   <goal>exec</goal>
@@ -556,27 +589,6 @@
           </plugin>
         </plugins>
       </build>
-      <dependencies>
-        <dependency>
-          <groupId>org.mockito</groupId>
-          <!--  Use mockito-inline instead of mockito-core to mock and spy on final classes. -->
-          <artifactId>mockito-inline</artifactId>
-          <version>${commons.mockito.version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.graalvm.js</groupId>
-          <artifactId>js</artifactId>
-          <version>${graalvm.version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.graalvm.js</groupId>
-          <artifactId>js-scriptengine</artifactId>
-          <version>${graalvm.version}</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
     </profile>
     <profile>
 	    <!-- Java 22 and up -->
