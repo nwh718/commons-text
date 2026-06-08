@@ -1,0 +1,207 @@
+diff --git a/SimplifiedStrBuilder.java b/SimplifiedStrBuilder.java
+++++new file mode 100644
+++++index 00000000..675185f4
+++++--- /dev/null
++++++++ b/SimplifiedStrBuilder.java
+++++@@ -0,0 +1,58 @@
++++++import java.util.Arrays;
++++++
++++++public class SimplifiedStrBuilder {
++++++    private char[] buffer;
++++++    private int size;
++++++    private static final int DEFAULT_CAPACITY = 32;
++++++
++++++    public SimplifiedStrBuilder() {
++++++        this(DEFAULT_CAPACITY);
++++++    }
++++++
++++++    public SimplifiedStrBuilder(int initialCapacity) {
++++++        if (initialCapacity <= 0) {
++++++            initialCapacity = DEFAULT_CAPACITY;
++++++        }
++++++        buffer = new char[initialCapacity];
++++++    }
++++++
++++++    public SimplifiedStrBuilder(String str) {
++++++        this(str != null ? str.length() + DEFAULT_CAPACITY : DEFAULT_CAPACITY);
++++++        if (str != null) {
++++++            append(str);
++++++        }
++++++    }
++++++
++++++    public SimplifiedStrBuilder append(String str) {
++++++        if (str == null) {
++++++            str = "null";
++++++        }
++++++        int strLen = str.length();
++++++        if (strLen > 0) {
++++++            ensureCapacity(size + strLen);
++++++            str.getChars(0, strLen, buffer, size);
++++++            size += strLen;
++++++        }
++++++        return this;
++++++    }
++++++
++++++    private void ensureCapacity(int capacity) {
++++++        if (capacity > buffer.length) {
++++++            char[] old = buffer;
++++++            buffer = new char[capacity * 2];
++++++            System.arraycopy(old, 0, buffer, 0, size);
++++++        }
++++++    }
++++++
++++++    public int length() {
++++++        return size;
++++++    }
++++++
++++++    public int capacity() {
++++++        return buffer.length;
++++++    }
++++++
++++++    public String toString() {
++++++        return new String(buffer, 0, size);
++++++    }
++++++}
+++++diff --git a/SimplifiedStrBuilderTest.java b/SimplifiedStrBuilderTest.java
+++++new file mode 100644
+++++index 00000000..6e1a307c
+++++--- /dev/null
++++++++ b/SimplifiedStrBuilderTest.java
+++++@@ -0,0 +1,32 @@
++++++public class SimplifiedStrBuilderTest {
++++++    public static void main(String[] args) {
++++++        // 测试 1: 基本追加
++++++        SimplifiedStrBuilder sb1 = new SimplifiedStrBuilder();
++++++        sb1.append("Hello").append(" ").append("World!");
++++++        System.out.println("测试 1 结果: " + sb1.toString());
++++++        System.out.println("预期: Hello World!");
++++++        System.out.println();
++++++
++++++        // 测试 2: 处理 null
++++++        SimplifiedStrBuilder sb2 = new SimplifiedStrBuilder();
++++++        sb2.append("Value: ").append(null);
++++++        System.out.println("测试 2 结果: " + sb2.toString());
++++++        System.out.println("预期: Value: null");
++++++        System.out.println();
++++++
++++++        // 测试 3: 使用字符串构造函数
++++++        SimplifiedStrBuilder sb3 = new SimplifiedStrBuilder("Initial");
++++++        sb3.append(" content");
++++++        System.out.println("测试 3 结果: " + sb3.toString());
++++++        System.out.println("预期: Initial content");
++++++        System.out.println();
++++++
++++++        // 测试 4: 容量扩展
++++++        SimplifiedStrBuilder sb4 = new SimplifiedStrBuilder(5);
++++++        System.out.println("测试 4 初始容量: " + sb4.capacity());
++++++        sb4.append("1234567890");
++++++        System.out.println("测试 4 追加后容量: " + sb4.capacity());
++++++        System.out.println("测试 4 结果: " + sb4.toString());
++++++        System.out.println("预期: 1234567890");
++++++    }
++++++}
++++diff --git a/5.4.2.patch b/5.4.2.patch
++++new file mode 100644
++++index 00000000..e69de29b
++++diff --git a/SimplifiedStrBuilder.java b/SimplifiedStrBuilder.java
++++deleted file mode 100644
++++index 675185f4..00000000
++++--- a/SimplifiedStrBuilder.java
+++++++ /dev/null
++++@@ -1,58 +0,0 @@
++++-import java.util.Arrays;
++++-
++++-public class SimplifiedStrBuilder {
++++-    private char[] buffer;
++++-    private int size;
++++-    private static final int DEFAULT_CAPACITY = 32;
++++-
++++-    public SimplifiedStrBuilder() {
++++-        this(DEFAULT_CAPACITY);
++++-    }
++++-
++++-    public SimplifiedStrBuilder(int initialCapacity) {
++++-        if (initialCapacity <= 0) {
++++-            initialCapacity = DEFAULT_CAPACITY;
++++-        }
++++-        buffer = new char[initialCapacity];
++++-    }
++++-
++++-    public SimplifiedStrBuilder(String str) {
++++-        this(str != null ? str.length() + DEFAULT_CAPACITY : DEFAULT_CAPACITY);
++++-        if (str != null) {
++++-            append(str);
++++-        }
++++-    }
++++-
++++-    public SimplifiedStrBuilder append(String str) {
++++-        if (str == null) {
++++-            str = "null";
++++-        }
++++-        int strLen = str.length();
++++-        if (strLen > 0) {
++++-            ensureCapacity(size + strLen);
++++-            str.getChars(0, strLen, buffer, size);
++++-            size += strLen;
++++-        }
++++-        return this;
++++-    }
++++-
++++-    private void ensureCapacity(int capacity) {
++++-        if (capacity > buffer.length) {
++++-            char[] old = buffer;
++++-            buffer = new char[capacity * 2];
++++-            System.arraycopy(old, 0, buffer, 0, size);
++++-        }
++++-    }
++++-
++++-    public int length() {
++++-        return size;
++++-    }
++++-
++++-    public int capacity() {
++++-        return buffer.length;
++++-    }
++++-
++++-    public String toString() {
++++-        return new String(buffer, 0, size);
++++-    }
++++-}
++++diff --git a/SimplifiedStrBuilderTest.java b/SimplifiedStrBuilderTest.java
++++deleted file mode 100644
++++index 6e1a307c..00000000
++++--- a/SimplifiedStrBuilderTest.java
+++++++ /dev/null
++++@@ -1,32 +0,0 @@
++++-public class SimplifiedStrBuilderTest {
++++-    public static void main(String[] args) {
++++-        // 测试 1: 基本追加
++++-        SimplifiedStrBuilder sb1 = new SimplifiedStrBuilder();
++++-        sb1.append("Hello").append(" ").append("World!");
++++-        System.out.println("测试 1 结果: " + sb1.toString());
++++-        System.out.println("预期: Hello World!");
++++-        System.out.println();
++++-
++++-        // 测试 2: 处理 null
++++-        SimplifiedStrBuilder sb2 = new SimplifiedStrBuilder();
++++-        sb2.append("Value: ").append(null);
++++-        System.out.println("测试 2 结果: " + sb2.toString());
++++-        System.out.println("预期: Value: null");
++++-        System.out.println();
++++-
++++-        // 测试 3: 使用字符串构造函数
++++-        SimplifiedStrBuilder sb3 = new SimplifiedStrBuilder("Initial");
++++-        sb3.append(" content");
++++-        System.out.println("测试 3 结果: " + sb3.toString());
++++-        System.out.println("预期: Initial content");
++++-        System.out.println();
++++-
++++-        // 测试 4: 容量扩展
++++-        SimplifiedStrBuilder sb4 = new SimplifiedStrBuilder(5);
++++-        System.out.println("测试 4 初始容量: " + sb4.capacity());
++++-        sb4.append("1234567890");
++++-        System.out.println("测试 4 追加后容量: " + sb4.capacity());
++++-        System.out.println("测试 4 结果: " + sb4.toString());
++++-        System.out.println("预期: 1234567890");
++++-    }
++++-}
