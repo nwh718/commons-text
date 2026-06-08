@@ -1,20 +1,30 @@
+diff --git a/src/main/java/org/apache/commons/text/StringSubstitutor.java b/src/main/java/org/apache/commons/text/StringSubstitutor.java
+index 0000000..0000000 100644
 --- a/src/main/java/org/apache/commons/text/StringSubstitutor.java
 +++ b/src/main/java/org/apache/commons/text/StringSubstitutor.java
-@@ -1145,6 +1145,19 @@
+@@ -1149,7 +1149,28 @@
          return resolver.apply(variableName);
      }
  
 +    /**
-+     * Resolves the value of a variable, returning a default value if the variable is unknown.
++     * Resolves the value of a variable, returning a default value if not found.
++     * <p>
++     * Most users of this class do not need to call this method. This method is called automatically by the substitution
++     * process.
++     * </p>
 +     *
 +     * @param variableName the name of the variable, not null.
-+     * @param defaultValue the default value to return if the variable is unknown.
-+     * @return The variable's value or the default value if the variable is unknown.
++     * @param defaultValue the default value to return if the variable is not found.
++     * @return The variable's value or {@code defaultValue} if the variable is unknown.
 +     * @since 1.16.0
 +     */
 +    protected String resolveVariableOrDefault(final String variableName, final String defaultValue) {
-+        final String resolvedValue = resolveVariable(variableName, null, -1, -1);
-+        return resolvedValue != null ? resolvedValue : defaultValue;
++        final StringLookup resolver = getStringLookup();
++        if (resolver == null) {
++            return defaultValue;
++        }
++        final String value = resolver.apply(variableName);
++        return value != null ? value : defaultValue;
 +    }
 +
      /**
