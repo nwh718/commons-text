@@ -504,7 +504,6 @@
 	  </dependencies>
     </profile>
     <profile>
-      <!-- Java 21 build -->
       <id>java-21-build</id>
       <activation>
         <jdk>21</jdk>
@@ -514,8 +513,6 @@
         <maven.compiler.target>21</maven.compiler.target>
         <commons.mockito.version>5.2.0</commons.mockito.version>
         <graalvm.version>22.3.5</graalvm.version>
-        <skipTests>true</skipTests>
-        <benchmark>org.apache.commons.text.StringProcessorBenchmark</benchmark>
       </properties>
       <dependencies>
         <dependency>
@@ -555,6 +552,8 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>${commons.compiler.version}</version>
             <configuration combine.self="override">
+              <source>21</source>
+              <target>21</target>
               <testIncludes>
                 <testInclude>**/*</testInclude>
               </testIncludes>
@@ -565,7 +564,7 @@
             <artifactId>exec-maven-plugin</artifactId>
             <executions>
               <execution>
-                <id>benchmark</id>
+                <id>jmh-string-processor-benchmark</id>
                 <phase>test</phase>
                 <goals>
                   <goal>exec</goal>
@@ -577,11 +576,11 @@
                     <argument>-classpath</argument>
                     <classpath />
                     <argument>org.openjdk.jmh.Main</argument>
+                    <argument>org.apache.commons.text.StringProcessorBenchmark</argument>
                     <argument>-rf</argument>
                     <argument>json</argument>
                     <argument>-rff</argument>
-                    <argument>target/jmh-result.json</argument>
-                    <argument>${benchmark}</argument>
+                    <argument>target/jmh-result-string-processor.json</argument>
                   </arguments>
                 </configuration>
               </execution>
