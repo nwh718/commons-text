@@ -1,0 +1,37 @@
+--- a/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
++++ b/src/test/java/org/apache/commons/text/StringEscapeUtilsTest.java
+@@ -226,6 +226,32 @@
+             final String actual = original == null ? null : sw.toString();
+             assertEquals(expected, actual, message);
+         }
+     }
+ 
++    @Test
++    void testEscapeHtml4EmptyString() {
++        assertEquals("", StringEscapeUtils.escapeHtml4(""));
++    }
++
++    @Test
++    void testEscapeHtml4MixedHtmlAndSpecialCharacters() {
++        final String input = "<span title=\"测试\">Tom & Jerry's 😀</span>";
++        assertEquals("&lt;span title=&quot;测试&quot;&gt;Tom &amp; Jerry's 😀&lt;/span&gt;", StringEscapeUtils.escapeHtml4(input));
++    }
++
++    @Test
++    void testEscapeHtml4NullInput() {
++        assertNull(StringEscapeUtils.escapeHtml4(null));
++    }
++
++    @Test
++    void testEscapeHtml4SpecialCharacters() {
++        assertEquals("&lt;&gt;&amp;&quot;'", StringEscapeUtils.escapeHtml4("<>&\"'"));
++    }
++
++    @Test
++    void testEscapeHtml4UnicodeCharacters() {
++        assertEquals("测试😀", StringEscapeUtils.escapeHtml4("测试😀"));
++    }
++
+     /**
+      * Tests // https://issues.apache.org/jira/browse/LANG-480
+      */
