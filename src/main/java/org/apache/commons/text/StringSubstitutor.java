@@ -1149,15 +1149,15 @@ public class StringSubstitutor {
     }
 
     /**
-     * Resolves the specified variable, returning the default value if the variable is unknown.
+     * Resolves the value of a variable, returning a default value if the variable is unknown.
      *
      * @param variableName the name of the variable, not null.
      * @param defaultValue the default value to return if the variable is unknown.
-     * @return the variable's value if known, otherwise {@code defaultValue}.
+     * @return The variable's value or the default value if the variable is unknown.
      * @since 1.16.0
      */
     protected String resolveVariableOrDefault(final String variableName, final String defaultValue) {
-        final String resolvedValue = resolveVariable(variableName, null, 0, 0);
+        final String resolvedValue = resolveVariable(variableName, null, -1, -1);
         return resolvedValue != null ? resolvedValue : defaultValue;
     }
 

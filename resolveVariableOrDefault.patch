@@ -1,21 +1,22 @@
-diff --git a/src/main/java/org/apache/commons/text/StringSubstitutor.java b/src/main/java/org/apache/commons/text/StringSubstitutor.java
 --- a/src/main/java/org/apache/commons/text/StringSubstitutor.java
 +++ b/src/main/java/org/apache/commons/text/StringSubstitutor.java
-@@ -1150,4 +1150,17 @@
+@@ -1145,6 +1145,19 @@
+         return resolver.apply(variableName);
+     }
  
-     /**
-+     * Resolves the specified variable, returning the default value if the variable is unknown.
++    /**
++     * Resolves the value of a variable, returning a default value if the variable is unknown.
 +     *
 +     * @param variableName the name of the variable, not null.
 +     * @param defaultValue the default value to return if the variable is unknown.
-+     * @return the variable's value if known, otherwise {@code defaultValue}.
++     * @return The variable's value or the default value if the variable is unknown.
 +     * @since 1.16.0
 +     */
 +    protected String resolveVariableOrDefault(final String variableName, final String defaultValue) {
-+        final String resolvedValue = resolveVariable(variableName, null, 0, 0);
++        final String resolvedValue = resolveVariable(variableName, null, -1, -1);
 +        return resolvedValue != null ? resolvedValue : defaultValue;
 +    }
 +
-+    /**
+     /**
       * Sets a flag whether substitution is done in variable values (recursive).
       *
