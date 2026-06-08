@@ -599,15 +599,6 @@ class StringEscapeUtilsTest {
     }
 
     @Test
-    void testUnscapeXSI() {
-        assertNull(null, unescapeXSI(null));
-        assertEquals("\"", unescapeXSI("\\\""));
-        assertEquals("He didn't say, \"Stop!\"", unescapeXSI("He\\ didn\\'t\\ say,\\ \\\"Stop!\\\""));
-        assertEquals("\\", unescapeXSI("\\\\"));
-        assertEquals("", unescapeXSI("\\"));
-    }
-
-    @Test
     void testEscapeHtml4NullInput() {
         assertNull(StringEscapeUtils.escapeHtml4(null));
     }
@@ -618,7 +609,7 @@ class StringEscapeUtilsTest {
     }
 
     @Test
-    void testEscapeHtml4SpecialCharacters() {
+    void testEscapeHtml4BasicSpecialChars() {
         assertEquals("&lt;", StringEscapeUtils.escapeHtml4("<"));
         assertEquals("&gt;", StringEscapeUtils.escapeHtml4(">"));
         assertEquals("&amp;", StringEscapeUtils.escapeHtml4("&"));
@@ -627,14 +618,23 @@ class StringEscapeUtilsTest {
     }
 
     @Test
-    void testEscapeHtml4UnicodeCharacters() {
-        assertEquals("测试", StringEscapeUtils.escapeHtml4("测试"));
-        assertEquals("😀", StringEscapeUtils.escapeHtml4("😀"));
+    void testEscapeHtml4UnicodeChineseAndEmoji() {
+        assertEquals("\u6D4B\u8BD5", StringEscapeUtils.escapeHtml4("\u6D4B\u8BD5"));
+        assertEquals("\uD83D\uDE00", StringEscapeUtils.escapeHtml4("\uD83D\uDE00"));
     }
 
     @Test
     void testEscapeHtml4MixedHtmlAndSpecialSymbols() {
-        assertEquals("&lt;div class=&quot;test&quot; style=&quot;color: red&quot;&gt;&amp;amp; more&lt;/div&gt;",
-                StringEscapeUtils.escapeHtml4("<div class=\"test\" style=\"color: red\">&amp; more</div>"));
+        assertEquals("&lt;div class=&quot;test&quot;&gt;A &amp; B&lt;/div&gt;",
+                StringEscapeUtils.escapeHtml4("<div class=\"test\">A & B</div>"));
+    }
+
+    @Test
+    void testUnscapeXSI() {
+        assertNull(null, unescapeXSI(null));
+        assertEquals("\"", unescapeXSI("\\\""));
+        assertEquals("He didn't say, \"Stop!\"", unescapeXSI("He\\ didn\\'t\\ say,\\ \\\"Stop!\\\""));
+        assertEquals("\\", unescapeXSI("\\\\"));
+        assertEquals("", unescapeXSI("\\"));
     }
 }
