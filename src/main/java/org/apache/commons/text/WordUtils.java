@@ -811,22 +811,28 @@ public class WordUtils {
         int matcherSize = -1;
 
         while (offset < inputLineLength) {
-            Matcher starter = patternToWrapOn.matcher(str.substring(offset,
+            int spaceToWrapAt = -1;
+            Matcher matcher = patternToWrapOn.matcher(str.substring(offset,
                     Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), inputLineLength)));
-            if (starter.lookingAt()) {
-                matcherSize = starter.end();
-                if (matcherSize != 0) {
-                    offset += starter.end();
-                    continue;
+            if (matcher.find()) {
+                if (matcher.start() == 0) {
+                    matcherSize = matcher.end();
+                    if (matcherSize != 0) {
+                        offset += matcher.end();
+                        continue;
+                    }
+                    offset += 1;
                 }
-                offset += 1;
+                spaceToWrapAt = matcher.start() + offset;
             }
-
-            int spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, true);
 
             // only last line without leading spaces is left
             if (inputLineLength - offset <= wrapLength) {
                 break;
+            }
+
+            while (matcher.find()) {
+                spaceToWrapAt = matcher.start() + offset;
             }
 
             if (spaceToWrapAt >= offset) {
@@ -847,12 +853,10 @@ public class WordUtils {
                 matcherSize = -1;
             } else {
                 // do not wrap really long word, just extend beyond limit
-                spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, false);
-                if (spaceToWrapAt >= 0) {
-                    Matcher m = patternToWrapOn.matcher(str.substring(spaceToWrapAt));
-                    if (m.lookingAt()) {
-                        matcherSize = m.end();
-                    }
+                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));
+                if (matcher.find()) {
+                    matcherSize = matcher.end() - matcher.start();
+                    spaceToWrapAt = matcher.start() + offset + wrapLength;
                 }
 
                 if (spaceToWrapAt >= 0) {
@@ -881,26 +885,6 @@ public class WordUtils {
         wrappedLine.append(str, offset, str.length());
 
         return wrappedLine.toString();
-    }
-
-    private static int findNextWrapPosition(final String str, final int offset, final int wrapLength, final Pattern pattern, final boolean wrapLongWords) {
-        int spaceToWrapAt = -1;
-        if (wrapLongWords) {
-            Matcher matcher = pattern.matcher(str.substring(offset,
-                    Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), str.length())));
-            if (matcher.find()) {
-                spaceToWrapAt = matcher.start() + offset;
-            }
-            while (matcher.find()) {
-                spaceToWrapAt = matcher.start() + offset;
-            }
-        } else {
-            Matcher matcher = pattern.matcher(str.substring(offset + wrapLength));
-            if (matcher.find()) {
-                spaceToWrapAt = matcher.start() + offset + wrapLength;
-            }
-        }
-        return spaceToWrapAt;
     }
 
     /**

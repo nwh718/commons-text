@@ -1,0 +1,172 @@
+diff --git a/WordUtils-wrap-refactor.patch b/WordUtils-wrap-refactor.patch
+deleted file mode 100644
+index 4bf7ebe7..00000000
+--- a/WordUtils-wrap-refactor.patch
++++ /dev/null
+@@ -1,77 +0,0 @@
+-diff --git a/src/main/java/org/apache/commons/text/WordUtils.java b/src/main/java/org/apache/commons/text/WordUtils.java
+---- a/src/main/java/org/apache/commons/text/WordUtils.java
+-+++ b/src/main/java/org/apache/commons/text/WordUtils.java
+-@@ -812,26 +812,20 @@
+- 
+-         while (offset < inputLineLength) {
+--            int spaceToWrapAt = -1;
+--            Matcher matcher = patternToWrapOn.matcher(str.substring(offset,
+-+            Matcher starter = patternToWrapOn.matcher(str.substring(offset,
+-                     Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), inputLineLength)));
+--            if (matcher.find()) {
+--                if (matcher.start() == 0) {
+--                    matcherSize = matcher.end();
+--                    if (matcherSize != 0) {
+--                        offset += matcher.end();
+--                        continue;
+--                    }
+--                    offset += 1;
+-+            if (starter.lookingAt()) {
+-+                matcherSize = starter.end();
+-+                if (matcherSize != 0) {
+-+                    offset += starter.end();
+-+                    continue;
+-                 }
+--                spaceToWrapAt = matcher.start() + offset;
+-+                offset += 1;
+-             }
+- 
+-+            int spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, true);
+-+
+-             // only last line without leading spaces is left
+-             if (inputLineLength - offset <= wrapLength) {
+-                 break;
+--            }
+--
+--            while (matcher.find()) {
+--                spaceToWrapAt = matcher.start() + offset;
+-             }
+-@@ -848,8 +842,10 @@
+-             } else {
+-                 // do not wrap really long word, just extend beyond limit
+--                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));
+--                if (matcher.find()) {
+--                    matcherSize = matcher.end() - matcher.start();
+--                    spaceToWrapAt = matcher.start() + offset + wrapLength;
+-+                spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, false);
+-+                if (spaceToWrapAt >= 0) {
+-+                    Matcher m = patternToWrapOn.matcher(str.substring(spaceToWrapAt));
+-+                    if (m.lookingAt()) {
+-+                        matcherSize = m.end();
+-+                    }
+-                 }
+-@@ -884,4 +880,24 @@
+-     }
+- 
+-+    private static int findNextWrapPosition(final String str, final int offset, final int wrapLength, final Pattern pattern, final boolean wrapLongWords) {
+-+        int spaceToWrapAt = -1;
+-+        if (wrapLongWords) {
+-+            Matcher matcher = pattern.matcher(str.substring(offset,
+-+                    Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), str.length())));
+-+            if (matcher.find()) {
+-+                spaceToWrapAt = matcher.start() + offset;
+-+            }
+-+            while (matcher.find()) {
+-+                spaceToWrapAt = matcher.start() + offset;
+-+            }
+-+        } else {
+-+            Matcher matcher = pattern.matcher(str.substring(offset + wrapLength));
+-+            if (matcher.find()) {
+-+                spaceToWrapAt = matcher.start() + offset + wrapLength;
+-+            }
+-+        }
+-+        return spaceToWrapAt;
+-+    }
+-+
+-     /**
+-      * {@code WordUtils} instances should NOT be constructed in
+\ No newline at end of file
+diff --git a/src/main/java/org/apache/commons/text/WordUtils.java b/src/main/java/org/apache/commons/text/WordUtils.java
+index 68297f58..720ca5f9 100644
+--- a/src/main/java/org/apache/commons/text/WordUtils.java
++++ b/src/main/java/org/apache/commons/text/WordUtils.java
+@@ -811,24 +811,30 @@ public class WordUtils {
+         int matcherSize = -1;
+ 
+         while (offset < inputLineLength) {
+-            Matcher starter = patternToWrapOn.matcher(str.substring(offset,
++            int spaceToWrapAt = -1;
++            Matcher matcher = patternToWrapOn.matcher(str.substring(offset,
+                     Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), inputLineLength)));
+-            if (starter.lookingAt()) {
+-                matcherSize = starter.end();
+-                if (matcherSize != 0) {
+-                    offset += starter.end();
+-                    continue;
++            if (matcher.find()) {
++                if (matcher.start() == 0) {
++                    matcherSize = matcher.end();
++                    if (matcherSize != 0) {
++                        offset += matcher.end();
++                        continue;
++                    }
++                    offset += 1;
+                 }
+-                offset += 1;
++                spaceToWrapAt = matcher.start() + offset;
+             }
+ 
+-            int spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, true);
+-
+             // only last line without leading spaces is left
+             if (inputLineLength - offset <= wrapLength) {
+                 break;
+             }
+ 
++            while (matcher.find()) {
++                spaceToWrapAt = matcher.start() + offset;
++            }
++
+             if (spaceToWrapAt >= offset) {
+                 // normal case
+                 wrappedLine.append(str, offset, spaceToWrapAt);
+@@ -847,12 +853,10 @@ public class WordUtils {
+                 matcherSize = -1;
+             } else {
+                 // do not wrap really long word, just extend beyond limit
+-                spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, false);
+-                if (spaceToWrapAt >= 0) {
+-                    Matcher m = patternToWrapOn.matcher(str.substring(spaceToWrapAt));
+-                    if (m.lookingAt()) {
+-                        matcherSize = m.end();
+-                    }
++                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));
++                if (matcher.find()) {
++                    matcherSize = matcher.end() - matcher.start();
++                    spaceToWrapAt = matcher.start() + offset + wrapLength;
+                 }
+ 
+                 if (spaceToWrapAt >= 0) {
+@@ -883,26 +887,6 @@ public class WordUtils {
+         return wrappedLine.toString();
+     }
+ 
+-    private static int findNextWrapPosition(final String str, final int offset, final int wrapLength, final Pattern pattern, final boolean wrapLongWords) {
+-        int spaceToWrapAt = -1;
+-        if (wrapLongWords) {
+-            Matcher matcher = pattern.matcher(str.substring(offset,
+-                    Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), str.length())));
+-            if (matcher.find()) {
+-                spaceToWrapAt = matcher.start() + offset;
+-            }
+-            while (matcher.find()) {
+-                spaceToWrapAt = matcher.start() + offset;
+-            }
+-        } else {
+-            Matcher matcher = pattern.matcher(str.substring(offset + wrapLength));
+-            if (matcher.find()) {
+-                spaceToWrapAt = matcher.start() + offset + wrapLength;
+-            }
+-        }
+-        return spaceToWrapAt;
+-    }
+-
+     /**
+      * {@code WordUtils} instances should NOT be constructed in
+      * standard programming. Instead, the class should be used as
