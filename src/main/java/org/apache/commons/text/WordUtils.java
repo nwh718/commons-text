@@ -562,6 +562,31 @@ public class WordUtils {
         return new String(newCodePoints, 0, outOffset);
     }
 
+    private static int findNextWrapPosition(final String str,
+                                            final int offset,
+                                            final int wrapLength,
+                                            final Pattern pattern,
+                                            final boolean wrapLongWords) {
+        if (wrapLongWords) {
+            int spaceToWrapAt = -1;
+            final Matcher matcher = pattern.matcher(str.substring(offset,
+                    Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), str.length())));
+            while (matcher.find()) {
+                spaceToWrapAt = matcher.start() + offset;
+            }
+            return spaceToWrapAt;
+        }
+        final int searchOffset = offset + wrapLength;
+        if (searchOffset >= str.length()) {
+            return -1;
+        }
+        final Matcher matcher = pattern.matcher(str.substring(searchOffset));
+        if (matcher.find()) {
+            return matcher.start() + searchOffset;
+        }
+        return -1;
+    }
+
     /**
      * Wraps a single line of text, identifying words by {@code ' '}.
      *
@@ -831,9 +856,7 @@ public class WordUtils {
                 break;
             }
 
-            while (matcher.find()) {
-                spaceToWrapAt = matcher.start() + offset;
-            }
+            spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, true);
 
             if (spaceToWrapAt >= offset) {
                 // normal case
@@ -853,9 +876,14 @@ public class WordUtils {
                 matcherSize = -1;
             } else {
                 // do not wrap really long word, just extend beyond limit
-                int[] result = findNextWrapPosition(str, offset + wrapLength, patternToWrapOn);
-                matcherSize = result[1];
-                spaceToWrapAt = result[0];
+                final int searchOffset = offset + wrapLength;
+                spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, false);
+                if (spaceToWrapAt >= 0) {
+                    matcher = patternToWrapOn.matcher(str.substring(searchOffset));
+                    if (matcher.find()) {
+                        matcherSize = matcher.end() - matcher.start();
+                    }
+                }
 
                 if (spaceToWrapAt >= 0) {
                     if (matcherSize == 0 && offset != 0) {
@@ -883,26 +911,6 @@ public class WordUtils {
         wrappedLine.append(str, offset, str.length());
 
         return wrappedLine.toString();
-    }
-
-    /**
-     * Finds the next position to wrap at.
-     *
-     * @param str the string to wrap
-     * @param offset the starting offset
-     * @param pattern the pattern to match for wrapping
-     * @return an array where index 0 is the position to wrap at (or -1 if not found),
-     *         and index 1 is the size of the matcher
-     */
-    private static int[] findNextWrapPosition(String str, int offset, Pattern pattern) {
-        int spaceToWrapAt = -1;
-        int matcherSize = -1;
-        Matcher matcher = pattern.matcher(str.substring(offset));
-        if (matcher.find()) {
-            matcherSize = matcher.end() - matcher.start();
-            spaceToWrapAt = matcher.start() + offset;
-        }
-        return new int[]{spaceToWrapAt, matcherSize};
     }
 
     /**

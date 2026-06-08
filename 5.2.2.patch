@@ -1,0 +1,190 @@
+diff --git a/TestWrapRefactoring.java b/TestWrapRefactoring.java
+deleted file mode 100644
+index 082c42ef..00000000
+--- a/TestWrapRefactoring.java
++++ /dev/null
+@@ -1,40 +0,0 @@
+-
+-package org.apache.commons.text;
+-
+-public class TestWrapRefactoring {
+-    public static void main(String[] args) {
+-        System.out.println("Testing WordUtils wrap function refactoring...");
+-
+-        // Test case 1: Basic wrap
+-        String input1 = "Here is one line of text that is going to be wrapped after 20 columns.";
+-        String expected1 = "Here is one line of\ntext that is going\nto be wrapped after\n20 columns.";
+-        String actual1 = WordUtils.wrap(input1, 20, "\n", false);
+-        System.out.println("Test 1 - Basic wrap: " + (expected1.equals(actual1) ? "PASS" : "FAIL"));
+-        if (!expected1.equals(actual1)) {
+-            System.out.println("  Expected: " + expected1);
+-            System.out.println("  Actual:   " + actual1);
+-        }
+-
+-        // Test case 2: Wrap long words
+-        String input2 = "Click here to jump to the commons website - https://commons.apache.org";
+-        String expected2 = "Click here to jump\nto the commons\nwebsite -\nhttps://commons.apach\ne.org";
+-        String actual2 = WordUtils.wrap(input2, 20, "\n", true);
+-        System.out.println("Test 2 - Wrap long words: " + (expected2.equals(actual2) ? "PASS" : "FAIL"));
+-        if (!expected2.equals(actual2)) {
+-            System.out.println("  Expected: " + expected2);
+-            System.out.println("  Actual:   " + actual2);
+-        }
+-
+-        // Test case 3: Custom wrap on character
+-        String input3 = "flammable/inflammable";
+-        String expected3 = "flammable\ninflammable";
+-        String actual3 = WordUtils.wrap(input3, 2, "\n", false, "/");
+-        System.out.println("Test 3 - Custom wrap character: " + (expected3.equals(actual3) ? "PASS" : "FAIL"));
+-        if (!expected3.equals(actual3)) {
+-            System.out.println("  Expected: " + expected3);
+-            System.out.println("  Actual:   " + actual3);
+-        }
+-
+-        System.out.println("All tests complete!");
+-    }
+-}
+diff --git a/src/main/java/org/apache/commons/text/WordUtils.java b/src/main/java/org/apache/commons/text/WordUtils.java
+index 304f57b7..323ccf8c 100644
+--- a/src/main/java/org/apache/commons/text/WordUtils.java
++++ b/src/main/java/org/apache/commons/text/WordUtils.java
+@@ -562,6 +562,31 @@ public class WordUtils {
+         return new String(newCodePoints, 0, outOffset);
+     }
+ 
++    private static int findNextWrapPosition(final String str,
++                                            final int offset,
++                                            final int wrapLength,
++                                            final Pattern pattern,
++                                            final boolean wrapLongWords) {
++        if (wrapLongWords) {
++            int spaceToWrapAt = -1;
++            final Matcher matcher = pattern.matcher(str.substring(offset,
++                    Math.min((int) Math.min(Integer.MAX_VALUE, offset + wrapLength + 1L), str.length())));
++            while (matcher.find()) {
++                spaceToWrapAt = matcher.start() + offset;
++            }
++            return spaceToWrapAt;
++        }
++        final int searchOffset = offset + wrapLength;
++        if (searchOffset >= str.length()) {
++            return -1;
++        }
++        final Matcher matcher = pattern.matcher(str.substring(searchOffset));
++        if (matcher.find()) {
++            return matcher.start() + searchOffset;
++        }
++        return -1;
++    }
++
+     /**
+      * Wraps a single line of text, identifying words by {@code ' '}.
+      *
+@@ -831,9 +856,7 @@ public class WordUtils {
+                 break;
+             }
+ 
+-            while (matcher.find()) {
+-                spaceToWrapAt = matcher.start() + offset;
+-            }
++            spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, true);
+ 
+             if (spaceToWrapAt >= offset) {
+                 // normal case
+@@ -853,9 +876,14 @@ public class WordUtils {
+                 matcherSize = -1;
+             } else {
+                 // do not wrap really long word, just extend beyond limit
+-                int[] result = findNextWrapPosition(str, offset + wrapLength, patternToWrapOn);
+-                matcherSize = result[1];
+-                spaceToWrapAt = result[0];
++                final int searchOffset = offset + wrapLength;
++                spaceToWrapAt = findNextWrapPosition(str, offset, wrapLength, patternToWrapOn, false);
++                if (spaceToWrapAt >= 0) {
++                    matcher = patternToWrapOn.matcher(str.substring(searchOffset));
++                    if (matcher.find()) {
++                        matcherSize = matcher.end() - matcher.start();
++                    }
++                }
+ 
+                 if (spaceToWrapAt >= 0) {
+                     if (matcherSize == 0 && offset != 0) {
+@@ -885,26 +913,6 @@ public class WordUtils {
+         return wrappedLine.toString();
+     }
+ 
+-    /**
+-     * Finds the next position to wrap at.
+-     *
+-     * @param str the string to wrap
+-     * @param offset the starting offset
+-     * @param pattern the pattern to match for wrapping
+-     * @return an array where index 0 is the position to wrap at (or -1 if not found),
+-     *         and index 1 is the size of the matcher
+-     */
+-    private static int[] findNextWrapPosition(String str, int offset, Pattern pattern) {
+-        int spaceToWrapAt = -1;
+-        int matcherSize = -1;
+-        Matcher matcher = pattern.matcher(str.substring(offset));
+-        if (matcher.find()) {
+-            matcherSize = matcher.end() - matcher.start();
+-            spaceToWrapAt = matcher.start() + offset;
+-        }
+-        return new int[]{spaceToWrapAt, matcherSize};
+-    }
+-
+     /**
+      * {@code WordUtils} instances should NOT be constructed in
+      * standard programming. Instead, the class should be used as
+diff --git a/wordutils-wrap-refactoring.patch b/wordutils-wrap-refactoring.patch
+deleted file mode 100644
+index 2e12b5d8..00000000
+--- a/wordutils-wrap-refactoring.patch
++++ /dev/null
+@@ -1,46 +0,0 @@
+-
+-diff --git a/src/main/java/org/apache/commons/text/WordUtils.java b/src/main/java/org/apache/commons/text/WordUtils.java
+-index 1234567..abcdef8 100644
+---- a/src/main/java/org/apache/commons/text/WordUtils.java
+-+++ b/src/main/java/org/apache/commons/text/WordUtils.java
+-@@ -852,12 +852,11 @@ public class WordUtils {
+-             } else {
+-                 // do not wrap really long word, just extend beyond limit
+--                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));
+--                if (matcher.find()) {
+--                    matcherSize = matcher.end() - matcher.start();
+--                    spaceToWrapAt = matcher.start() + offset + wrapLength;
+--                }
+-+                int[] result = findNextWrapPosition(str, offset + wrapLength, patternToWrapOn);
+-+                matcherSize = result[1];
+-+                spaceToWrapAt = result[0];
+- 
+-                 if (spaceToWrapAt >= 0) {
+-                     if (matcherSize == 0 && offset != 0) {
+-@@ -884,6 +883,21 @@ public class WordUtils {
+-         return wrappedLine.toString();
+-     }
+- 
+-+    /**
+-+     * Finds the next position to wrap at.
+-+     *
+-+     * @param str the string to wrap
+-+     * @param offset the starting offset
+-+     * @param pattern the pattern to match for wrapping
+-+     * @return an array where index 0 is the position to wrap at (or -1 if not found),
+-+     *         and index 1 is the size of the matcher
+-+     */
+-+    private static int[] findNextWrapPosition(String str, int offset, Pattern pattern) {
+-+        int spaceToWrapAt = -1;
+-+        int matcherSize = -1;
+-+        Matcher matcher = pattern.matcher(str.substring(offset));
+-+        if (matcher.find()) {
+-+            matcherSize = matcher.end() - matcher.start();
+-+            spaceToWrapAt = matcher.start() + offset;
+-+        }
+-+        return new int[]{spaceToWrapAt, matcherSize};
+-+    }
+- 
+-     /**
+-      * {@code WordUtils} instances should NOT be constructed in
+-
