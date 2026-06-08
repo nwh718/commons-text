@@ -1,0 +1,110 @@
+diff --git a/resolveVariableOrDefault.patch b/resolveVariableOrDefault.patch
+deleted file mode 100644
+index 4b0dda0b..00000000
+--- a/resolveVariableOrDefault.patch
++++ /dev/null
+@@ -1,29 +0,0 @@
+-diff --git a/src/main/java/org/apache/commons/text/StringSubstitutor.java b/src/main/java/org/apache/commons/text/StringSubstitutor.java
+-index 1111111..2222222 100644
+---- a/src/main/java/org/apache/commons/text/StringSubstitutor.java
+-+++ b/src/main/java/org/apache/commons/text/StringSubstitutor.java
+-@@ -1148,6 +1148,24 @@
+-         return resolver.apply(variableName);
+-     }
+- 
+-+    /**
+-+     * Resolves the specified variable with a default value fallback.
+-+     * <p>
+-+     * This method attempts to resolve the variable by name. If the variable
+-+     * is not found (i.e., the resolution returns {@code null}), the specified
+-+     * default value is returned instead.
+-+     * </p>
+-+     *
+-+     * @param variableName the name of the variable to resolve, not null.
+-+     * @param defaultValue the value to return if the variable is not found, may be null.
+-+     * @return The variable's value, or {@code defaultValue} if the variable is unknown.
+-+     * @since 1.16.0
+-+     */
+-+    public String resolveVariableOrDefault(final String variableName, final String defaultValue) {
+-+        final String result = resolveVariable(variableName, null, 0, 0);
+-+        return result != null ? result : defaultValue;
+-+    }
+-+
+-     /**
+-      * Sets a flag whether substitution is done in variable values (recursive).
+-      *
+diff --git a/src/main/java/org/apache/commons/text/StringSubstitutor.java b/src/main/java/org/apache/commons/text/StringSubstitutor.java
+index fa304412..9fce66de 100644
+--- a/src/main/java/org/apache/commons/text/StringSubstitutor.java
++++ b/src/main/java/org/apache/commons/text/StringSubstitutor.java
+@@ -1148,24 +1148,6 @@ public class StringSubstitutor {
+         return resolver.apply(variableName);
+     }
+ 
+-    /**
+-     * Resolves the specified variable with a default value fallback.
+-     * <p>
+-     * This method attempts to resolve the variable by name. If the variable
+-     * is not found (i.e., the resolution returns {@code null}), the specified
+-     * default value is returned instead.
+-     * </p>
+-     *
+-     * @param variableName the name of the variable to resolve, not null.
+-     * @param defaultValue the value to return if the variable is not found, may be null.
+-     * @return The variable's value, or {@code defaultValue} if the variable is unknown.
+-     * @since 1.16.0
+-     */
+-    public String resolveVariableOrDefault(final String variableName, final String defaultValue) {
+-        final String result = resolveVariable(variableName, null, 0, 0);
+-        return result != null ? result : defaultValue;
+-    }
+-
+     /**
+      * Sets a flag whether substitution is done in variable values (recursive).
+      *
+diff --git a/src/main/java/org/apache/commons/text/WordUtils.java b/src/main/java/org/apache/commons/text/WordUtils.java
+index 720ca5f9..304f57b7 100644
+--- a/src/main/java/org/apache/commons/text/WordUtils.java
++++ b/src/main/java/org/apache/commons/text/WordUtils.java
+@@ -853,11 +853,9 @@ public class WordUtils {
+                 matcherSize = -1;
+             } else {
+                 // do not wrap really long word, just extend beyond limit
+-                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));
+-                if (matcher.find()) {
+-                    matcherSize = matcher.end() - matcher.start();
+-                    spaceToWrapAt = matcher.start() + offset + wrapLength;
+-                }
++                int[] result = findNextWrapPosition(str, offset + wrapLength, patternToWrapOn);
++                matcherSize = result[1];
++                spaceToWrapAt = result[0];
+ 
+                 if (spaceToWrapAt >= 0) {
+                     if (matcherSize == 0 && offset != 0) {
+@@ -887,6 +885,26 @@ public class WordUtils {
+         return wrappedLine.toString();
+     }
+ 
++    /**
++     * Finds the next position to wrap at.
++     *
++     * @param str the string to wrap
++     * @param offset the starting offset
++     * @param pattern the pattern to match for wrapping
++     * @return an array where index 0 is the position to wrap at (or -1 if not found),
++     *         and index 1 is the size of the matcher
++     */
++    private static int[] findNextWrapPosition(String str, int offset, Pattern pattern) {
++        int spaceToWrapAt = -1;
++        int matcherSize = -1;
++        Matcher matcher = pattern.matcher(str.substring(offset));
++        if (matcher.find()) {
++            matcherSize = matcher.end() - matcher.start();
++            spaceToWrapAt = matcher.start() + offset;
++        }
++        return new int[]{spaceToWrapAt, matcherSize};
++    }
++
+     /**
+      * {@code WordUtils} instances should NOT be constructed in
+      * standard programming. Instead, the class should be used as

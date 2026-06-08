@@ -1149,24 +1149,6 @@ public class StringSubstitutor {
     }
 
     /**
-     * Resolves the specified variable with a default value fallback.
-     * <p>
-     * This method attempts to resolve the variable by name. If the variable
-     * is not found (i.e., the resolution returns {@code null}), the specified
-     * default value is returned instead.
-     * </p>
-     *
-     * @param variableName the name of the variable to resolve, not null.
-     * @param defaultValue the value to return if the variable is not found, may be null.
-     * @return The variable's value, or {@code defaultValue} if the variable is unknown.
-     * @since 1.16.0
-     */
-    public String resolveVariableOrDefault(final String variableName, final String defaultValue) {
-        final String result = resolveVariable(variableName, null, 0, 0);
-        return result != null ? result : defaultValue;
-    }
-
-    /**
      * Sets a flag whether substitution is done in variable values (recursive).
      *
      * @param disableSubstitutionInValues true if substitution in variable value are disabled.

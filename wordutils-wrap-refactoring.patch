@@ -1,0 +1,46 @@
+
+diff --git a/src/main/java/org/apache/commons/text/WordUtils.java b/src/main/java/org/apache/commons/text/WordUtils.java
+index 1234567..abcdef8 100644
+--- a/src/main/java/org/apache/commons/text/WordUtils.java
++++ b/src/main/java/org/apache/commons/text/WordUtils.java
+@@ -852,12 +852,11 @@ public class WordUtils {
+             } else {
+                 // do not wrap really long word, just extend beyond limit
+-                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));
+-                if (matcher.find()) {
+-                    matcherSize = matcher.end() - matcher.start();
+-                    spaceToWrapAt = matcher.start() + offset + wrapLength;
+-                }
++                int[] result = findNextWrapPosition(str, offset + wrapLength, patternToWrapOn);
++                matcherSize = result[1];
++                spaceToWrapAt = result[0];
+ 
+                 if (spaceToWrapAt >= 0) {
+                     if (matcherSize == 0 && offset != 0) {
+@@ -884,6 +883,21 @@ public class WordUtils {
+         return wrappedLine.toString();
+     }
+ 
++    /**
++     * Finds the next position to wrap at.
++     *
++     * @param str the string to wrap
++     * @param offset the starting offset
++     * @param pattern the pattern to match for wrapping
++     * @return an array where index 0 is the position to wrap at (or -1 if not found),
++     *         and index 1 is the size of the matcher
++     */
++    private static int[] findNextWrapPosition(String str, int offset, Pattern pattern) {
++        int spaceToWrapAt = -1;
++        int matcherSize = -1;
++        Matcher matcher = pattern.matcher(str.substring(offset));
++        if (matcher.find()) {
++            matcherSize = matcher.end() - matcher.start();
++            spaceToWrapAt = matcher.start() + offset;
++        }
++        return new int[]{spaceToWrapAt, matcherSize};
++    }
+ 
+     /**
+      * {@code WordUtils} instances should NOT be constructed in
+

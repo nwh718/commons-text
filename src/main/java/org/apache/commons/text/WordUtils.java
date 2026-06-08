@@ -853,11 +853,9 @@ public class WordUtils {
                 matcherSize = -1;
             } else {
                 // do not wrap really long word, just extend beyond limit
-                matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength));
-                if (matcher.find()) {
-                    matcherSize = matcher.end() - matcher.start();
-                    spaceToWrapAt = matcher.start() + offset + wrapLength;
-                }
+                int[] result = findNextWrapPosition(str, offset + wrapLength, patternToWrapOn);
+                matcherSize = result[1];
+                spaceToWrapAt = result[0];
 
                 if (spaceToWrapAt >= 0) {
                     if (matcherSize == 0 && offset != 0) {
@@ -885,6 +883,26 @@ public class WordUtils {
         wrappedLine.append(str, offset, str.length());
 
         return wrappedLine.toString();
+    }
+
+    /**
+     * Finds the next position to wrap at.
+     *
+     * @param str the string to wrap
+     * @param offset the starting offset
+     * @param pattern the pattern to match for wrapping
+     * @return an array where index 0 is the position to wrap at (or -1 if not found),
+     *         and index 1 is the size of the matcher
+     */
+    private static int[] findNextWrapPosition(String str, int offset, Pattern pattern) {
+        int spaceToWrapAt = -1;
+        int matcherSize = -1;
+        Matcher matcher = pattern.matcher(str.substring(offset));
+        if (matcher.find()) {
+            matcherSize = matcher.end() - matcher.start();
+            spaceToWrapAt = matcher.start() + offset;
+        }
+        return new int[]{spaceToWrapAt, matcherSize};
     }
 
     /**
