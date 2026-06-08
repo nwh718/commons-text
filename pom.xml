@@ -504,7 +504,7 @@
 	  </dependencies>
     </profile>
     <profile>
-      <!-- Java 21 build profile -->
+      <!-- Java 21 build -->
       <id>java-21-build</id>
       <activation>
         <jdk>21</jdk>

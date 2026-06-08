@@ -1,0 +1,13 @@
+diff --git a/pom.xml b/pom.xml
+index 7a927b3e..a8c63c8a 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -504,7 +504,7 @@
+ 	  </dependencies>
+     </profile>
+     <profile>
+-      <!-- Java 21 build profile -->
++      <!-- Java 21 build -->
+       <id>java-21-build</id>
+       <activation>
+         <jdk>21</jdk>
